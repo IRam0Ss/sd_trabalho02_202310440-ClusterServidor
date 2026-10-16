@@ -1,0 +1,17 @@
+[CONFIG:AUTO] ID atribuido automaticamente: Nó 4 | Portas: Cluster=9004, TCP=6819, UDP=7807
+[CONFIG:AUTO] Nós locais detectados previamente em execucao: Nó 1 Nó 2 Nó 3 
+
+[SISTEMA] Servidor iniciado com sucesso. Digite 'ajuda' para comandos de depuracao.
+
+[CLUSTER:TCP] [INFO] Canal de cluster escutando na porta 9004
+[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 1 (127.0.0.1:9001)
+[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 2 (127.0.0.1:9002)
+[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 3 (127.0.0.1:9003)
+[GERENCIADOR] [INFO] Snapshot importado com sucesso. Versao atual: 0 | Total usuarios: 0 | Grupos: 0
+[REPLICADOR] [INFO] Snapshot instalado com sucesso. Versao atual: 0
+[CLUSTER] [INFO] Sincronizacao concluida. Nó operando em STANDBY.
+[GERENCIADOR] [INFO] Usuario 'DinamicoAgente' registrado com sucesso. Total ativos: 1 | Versao: 1
+[GERENCIADOR] [INFO] Usuario 'DinamicoAgente' entrou no grupo 'SALA_DINAMICA'. Total: 1 | Versao: 2
+[ELEICAO] [WARNING] Lider ativo conhecido (Nó 1) caiu ou esta inacessivel.
+[ELEICAO] [WARNING] Disparando eleicao para eleger novo lider...
+[CLUSTER] [INFO] Novo lider anunciado: Nó 2 (Epoca: 1)

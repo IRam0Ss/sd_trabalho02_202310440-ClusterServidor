@@ -1,0 +1,26 @@
+
+[SISTEMA] Servidor iniciado com sucesso. Digite 'ajuda' para comandos de depuracao.
+
+[CLUSTER:TCP] [ERROR] Erro no ServerSocket de cluster: Endereço já em uso (Bind failed)
+java.net.BindException: Endereço já em uso (Bind failed)
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.AbstractPlainSocketImpl.bind(AbstractPlainSocketImpl.java:387)
+	at java.net.ServerSocket.bind(ServerSocket.java:395)
+	at java.net.ServerSocket.bind(ServerSocket.java:349)
+	at cluster.CanalCluster.lambda$iniciar$0(CanalCluster.java:97)
+	at java.lang.Thread.run(Thread.java:750)
+[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 2 (127.0.0.1:9002)
+[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 3 (127.0.0.1:9003)
+[CLUSTER] [INFO] Nenhum lider ativo encontrado. Assumindo lideranca inicial (Nó 1)...
+[SERVIDOR:TCP] [ERROR] Endereço já em uso (Bind failed)
+=== SERVICOS DE ATENDIMENTO ABERTOS (PAPEL: ATIVO) ===
+Interfaces de rede detectadas:
+TCP escutando em 6789
+UDP escutando em 7777
+Discovery escutando em 8888
+======================================================
+[SERVIDOR:TCP] [ERROR] Endereço já em uso (Bind failed)
+[DISCOVERY:8888] Farol UDP ligado na porta 8888 aguardando buscas...
+[DISCOVERY:5001] Farol UDP ligado na porta 5001 aguardando buscas...
+[SERVIDOR:UDP] [INFO] Escutando na porta 7777
+[SERVIDOR:UDP] [ERROR] Erro no socket UDP (porta 5000): Endereço já em uso (Bind failed)
