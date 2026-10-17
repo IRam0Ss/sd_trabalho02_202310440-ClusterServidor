@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 18/09/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Cliente
 * Funcao.............: Orquestra a conexao do cliente em modo linha de comando, gerenciando threads TCP e UDP.
 *************************************************************** */

@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Principal
 * Funcao.............: Ponto de entrada do Servidor com suporte a cluster dinamico, auto-atribuicao de ID e console interativo.
 *************************************************************** */
@@ -71,27 +71,27 @@ public class Principal {
         System.out.println("        E.D.E.N. - SERVIDOR DISTRIBUIDO           ");
         System.out.println("==================================================");
         System.out.println("Selecione o modo de execucao:");
-        System.out.println("  [1] LOCAL - Mesma maquina (atribuicao automatica de portas e ID)");
-        System.out.println("  [2] REDE  - Maquinas distintas na mesma rede local (LAN)");
-        System.out.print("Escolha [1/2] (Pressione ENTER para LOCAL): ");
+        System.out.println("  [1] REDE  - Maquinas distintas na rede local LAN (Padrao)");
+        System.out.println("  [2] LOCAL - Mesma maquina (atribuicao automatica de portas e ID)");
+        System.out.print("Escolha [1/2] (Pressione ENTER para REDE): ");
 
         String linha = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
-        if ("2".equals(linha) || "rede".equalsIgnoreCase(linha) || "lan".equalsIgnoreCase(linha)) {
-          config = ConfigCluster.descobrirEConfigurarRede(null);
-        } else {
+        if ("2".equals(linha) || "local".equalsIgnoreCase(linha)) {
           config = ConfigCluster.descobrirEConfigurarLocal(null);
+        } else {
+          config = ConfigCluster.descobrirEConfigurarRede(null);
         }
       }
 
     } catch (Exception e) {
-      System.err.println("[INICIO] [AVISO] Falha ao processar argumentos (" + e.getMessage() + "). Assumindo auto-configuracao local.");
-      config = ConfigCluster.descobrirEConfigurarLocal(null);
+      System.err.println("[INICIO] [AVISO] Falha ao processar argumentos (" + e.getMessage() + "). Assumindo auto-configuracao de rede.");
+      config = ConfigCluster.descobrirEConfigurarRede(null);
     }
 
     GerenciadorGrupos gerenciador = new GerenciadorGrupos();
     NoCluster noCluster = new NoCluster(config, gerenciador);
 
-    // Se estiver rodando em modo rede, ativa o beacon de broadcast UDP para novos nós
+    // Se estiver rodando em modo rede, ativa o beacon de broadcast UDP para novos nos
     if (!"127.0.0.1".equals(config.getMeuNoInfo().host)) {
       beaconLAN = new BeaconClusterLAN(config, new BeaconClusterLAN.ListenerNovoParLAN() {
         @Override
@@ -102,10 +102,10 @@ public class Principal {
 
         @Override
         public void onParSaindo(int idPar) {
-          ClusterLog.info("BEACON:LAN", "Nó " + idPar + " anunciou saída via broadcast LAN.");
+          ClusterLog.info("BEACON:LAN", "No " + idPar + " anunciou saida via broadcast LAN.");
           noCluster.getVisao().marcarDown(idPar);
           if (idPar == noCluster.getIdLiderAtivo()) {
-            ClusterLog.eleicao("Líder ativo anunciou saída da rede. Disparando eleição imediata!");
+            ClusterLog.eleicao("Lider ativo anunciou saida da rede. Disparando eleicao imediata!");
             noCluster.dispararEleicao();
           }
         }
@@ -117,7 +117,7 @@ public class Principal {
 
     // Registra shutdown hook para saida graciosa e failover imediato
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      System.out.println("\n[SISTEMA] Sinal de encerramento detectado. Finalizando nó...");
+      System.out.println("\n[SISTEMA] Sinal de encerramento detectado. Finalizando no...");
       if (finalBeacon != null) {
         finalBeacon.parar();
       }
@@ -196,10 +196,10 @@ public class Principal {
 
   private static void exibirAjuda() {
     System.out.println("\nComandos disponiveis no console:");
-    System.out.println("  status / cluster - Exibe tabela visual do cluster, papéis, épocas, versões e saúde.");
-    System.out.println("  estado           - Exibe dump da estrutura de dados replicada (usuários, salas, ticks).");
+    System.out.println("  status / cluster - Exibe tabela visual do cluster, papeis, epocas, versoes e saude.");
+    System.out.println("  estado           - Exibe dump da estrutura de dados replicada (usuarios, salas, ticks).");
     System.out.println("  ajuda            - Mostra esta mensagem de ajuda.");
-    System.out.println("  sair             - Encerra este nó graciosamente com failover imediato para os outros.\n");
+    System.out.println("  sair             - Encerra este no graciosamente com failover imediato para os outros.\n");
   }
 
 }

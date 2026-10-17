@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: GerenciadorGrupos
 * Funcao.............: Cerne unico de estado do servidor E.D.E.N. (usuarios, salas, bloqueios, mensagens e ticks).
 *************************************************************** */
@@ -654,7 +654,7 @@ public class GerenciadorGrupos implements Serializable {
   /**
    * Calcula um hash CRC32 canonico sobre representacao estritamente ordenada do estado.
    * Independe da ordem interna das tabelas de hash e permite validacao deterministica
-   * de congruencia de estado entre os nós do cluster.
+   * de congruencia de estado entre os nos do cluster.
    */
   public synchronized long calcularHash() {
     CRC32 crc = new CRC32();

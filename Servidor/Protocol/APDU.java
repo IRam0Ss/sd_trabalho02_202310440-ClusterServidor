@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 20/06/2026
-* Ultima alteracao...: 18/09/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: APDU (Application Protocol Data Unit)
 * Funcao.............: Modela e gerencia as unidades de dados do protocolo
 *                      utilizadas na comunicacao cliente-servidor (TCP) e

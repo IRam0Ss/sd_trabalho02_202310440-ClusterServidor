@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: GerenciadorConexao
 * Funcao.............: Orquestrador de failover transparente no cliente, monitoramento PING e lista de servidores.
 *************************************************************** */
@@ -88,7 +88,7 @@ public class GerenciadorConexao {
     synchronized (servidoresConhecidos) {
       if (!servidoresConhecidos.contains(end)) {
         servidoresConhecidos.add(end);
-        System.out.println("[FAILOVER] Novo servidor registrado na lista de nós conhecidos: " + end);
+        System.out.println("[FAILOVER] Novo servidor registrado na lista de nos conhecidos: " + end);
       }
     }
   }
@@ -104,7 +104,7 @@ public class GerenciadorConexao {
   }
 
   /**
-   * Inicia a thread de monitoramento continuo com PING periódico (a cada 2000 ms).
+   * Inicia a thread de monitoramento continuo com PING periodico (a cada 2000 ms).
    */
   public void iniciarMonitoramento() {
     Thread threadPing = new Thread(() -> {

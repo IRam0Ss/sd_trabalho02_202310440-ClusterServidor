@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Servidor
 * Funcao.............: Orquestrador de servicos de rede (TCP, UDP, Discovery) com suporte a ativacao/desativacao dinamica.
 *************************************************************** */
@@ -22,7 +22,7 @@ import utils.Protocolo;
 /**
  * Classe responsavel por inicializar, supervisionar e parar dinamicamente os subsistemas de servico:
  * escuta de conexoes confiaveis (TCP), canal de dados/notificacoes (UDP) e beacon de descoberta local (Discovery).
- * Permite que apenas o nó eleito como ATIVO no cluster mantenha portas de atendimento abertas.
+ * Permite que apenas o no eleito como ATIVO no cluster mantenha portas de atendimento abertas.
  * 
  * @author Iury Ramos Sodre (Matricula: 202310440)
  * @version 3.0
@@ -59,13 +59,13 @@ public class Servidor {
   }
 
   /**
-   * Inicia dinamicamente as portas de servico quando o nó assume o papel de ATIVO.
+   * Inicia dinamicamente as portas de servico quando o no assume o papel de ATIVO.
    * 
    * @param portaTcp        Porta de controle TCP.
    * @param portaUdp        Porta de dados UDP.
    * @param portaDiscovery  Porta UDP de descoberta local.
    * @param incluirLegado   Se true, tenta vincular tambem as portas legadas (5000/5001).
-   * @param idNo            Identificador do nó atual no cluster.
+   * @param idNo            Identificador do no atual no cluster.
    */
   public synchronized void iniciarServicos(int portaTcp, int portaUdp, int portaDiscovery, boolean incluirLegado, int idNo) {
     if (servicosAtivos) {

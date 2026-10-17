@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 16/10/2026
-* Ultima alteracao...: 16/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: ClusterLog
 * Funcao.............: Utilitario de logging elegante com timestamps [HH:mm:ss], badges semanticos e controle anti-spam.
 *************************************************************** */
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utilitario de log padronizado para o cluster E.D.E.N.
- * Garante que todas as mensagens possuam marcação temporal [HH:mm:ss],
+ * Garante que todas as mensagens possuam marcacao temporal [HH:mm:ss],
  * identificadores semanticos visuais (LIDER, STANDBY, ELEICAO, REPLICACAO, SPLIT-BRAIN)
  * e supressao de repeticoes continuas de heartbeats.
  * 
@@ -52,7 +52,7 @@ public class ClusterLog {
   }
 
   public static void lider(String mensagem) {
-    System.out.println(timestamp() + " [LÍDER ATIVO] " + mensagem);
+    System.out.println(timestamp() + " [LIDER ATIVO] " + mensagem);
   }
 
   public static void standby(String mensagem) {
@@ -60,11 +60,11 @@ public class ClusterLog {
   }
 
   public static void eleicao(String mensagem) {
-    System.out.println(timestamp() + " [ELEIÇÃO] " + mensagem);
+    System.out.println(timestamp() + " [ELEICAO] " + mensagem);
   }
 
   public static void replicacao(String mensagem) {
-    System.out.println(timestamp() + " [REPLICAÇÃO] " + mensagem);
+    System.out.println(timestamp() + " [REPLICACAO] " + mensagem);
   }
 
   public static void conflito(String mensagem) {
@@ -92,9 +92,9 @@ public class ClusterLog {
       ultimoLogHbMs.set(agora);
       ultimoQtdVivos = totalVivos;
       ultimoLiderNotificado = idLider;
-      String liderStr = (idLider > 0) ? ("Nó " + idLider) : "NENHUM";
+      String liderStr = (idLider > 0) ? ("No " + idLider) : "NENHUM";
       System.out.println(timestamp() + " [HEARTBEAT] Cluster operacional: " + totalVivos + "/" + totalConhecidos
-          + " nós ativos | Líder atual: " + liderStr);
+          + " nos ativos | Lider atual: " + liderStr);
     }
   }
 
@@ -109,16 +109,16 @@ public class ClusterLog {
     System.out.println("==========================================================================================");
     System.out.println("                         STATUS DO CLUSTER DISTRIBUIDO E.D.E.N.                          ");
     System.out.println("==========================================================================================");
-    System.out.printf(" Nó Local: Nó %d %s | Papel: %s | Época: %d | Versão de Dados: %d\n",
-        meuId, (meuId == idLider ? "[LÍDER ATIVO]" : "[STANDBY]"), meuPapel, epoca, gerenciador.getVersao());
-    System.out.printf(" Líder Conhecido: Nó %s | Total de Membros: %d\n",
+    System.out.printf(" No Local: No %d %s | Papel: %s | Epoca: %d | Versao de Dados: %d\n",
+        meuId, (meuId == idLider ? "[LIDER ATIVO]" : "[STANDBY]"), meuPapel, epoca, gerenciador.getVersao());
+    System.out.printf(" Lider Conhecido: No %s | Total de Membros: %d\n",
         (idLider > 0 ? String.valueOf(idLider) : "NENHUM"), nos.size());
     System.out.println("------------------------------------------------------------------------------------------");
     System.out.printf("| %-4s | %-20s | %-9s | %-6s | %-7s | %-8s | %-12s |\n",
-        "ID", "ENDEREÇO", "PAPEL", "ÉPOCA", "VERSÃO", "SAÚDE", "ÚLTIMO HB");
+        "ID", "ENDERECO", "PAPEL", "EPOCA", "VERSAO", "SAUDE", "ULTIMO HB");
     System.out.println("------------------------------------------------------------------------------------------");
 
-    // Imprime nó local
+    // Imprime no local
     ConfigCluster.NoInfo meuInfo = nos.get(meuId);
     String hostLocal = (meuInfo != null) ? (meuInfo.host + ":" + meuInfo.portaCluster) : "local";
     System.out.printf("| %-4s | %-20s | %-9s | %-6d | %-7d | %-8s | %-12s |\n",
@@ -128,7 +128,7 @@ public class ClusterLog {
     for (VisaoCluster.ParEstado p : pares) {
       if (p.id == meuId) continue;
       long deltaHb = (p.ultimoHeartbeat > 0) ? (System.currentTimeMillis() - p.ultimoHeartbeat) : -1;
-      String hbStr = (deltaHb >= 0) ? (deltaHb + "ms atrás") : "nunca";
+      String hbStr = (deltaHb >= 0) ? (deltaHb + "ms atras") : "nunca";
       String saude = p.isVivo() ? "ONLINE" : "DOWN";
       String idDisplay = (p.id == idLider) ? (p.id + " (L)") : String.valueOf(p.id);
 
@@ -137,7 +137,7 @@ public class ClusterLog {
     }
 
     System.out.println("------------------------------------------------------------------------------------------");
-    System.out.println(" Legenda: (*) Nó local | (L) Líder Ativo atual");
+    System.out.println(" Legenda: (*) No local | (L) Lider Ativo atual");
     System.out.println("==========================================================================================\n");
   }
 }

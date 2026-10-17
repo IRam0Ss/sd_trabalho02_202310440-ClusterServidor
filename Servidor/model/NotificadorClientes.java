@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: NotificadorClientes
 * Funcao.............: Despacha notificacoes assincronas via UDP para os clientes ativos do E.D.E.N.
 *************************************************************** */
@@ -85,7 +85,7 @@ public class NotificadorClientes {
    * @param portaTcp Porta TCP do novo lider.
    * @param portaUdp Porta UDP do novo lider.
    * @param epoca    Epoca de lideranca.
-   * @param idNo     ID do nó que assumiu.
+   * @param idNo     ID do no que assumiu.
    */
   public static void notificarServerChanged(Collection<InfoUser> usuarios, String novoIp, int portaTcp, int portaUdp, long epoca, int idNo) {
     if (usuarios == null || usuarios.isEmpty()) {

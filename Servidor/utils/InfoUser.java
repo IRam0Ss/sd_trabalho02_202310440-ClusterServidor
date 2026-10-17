@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 18/09/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: InfoUser
 * Funcao.............: Entidade de dados para representacao e identificacao unica de usuarios conectados.
 *************************************************************** */

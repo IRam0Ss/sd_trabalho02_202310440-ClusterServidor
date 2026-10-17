@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: MensagemCluster
 * Funcao.............: Envelope de mensagem serializavel transmitida no canal TCP interno do cluster.
 *************************************************************** */
@@ -136,7 +136,7 @@ public class MensagemCluster implements Serializable {
 
   @Override
   public String toString() {
-    return String.format("MensagemCluster[%s de Nó %d | ep=%d, v=%d, est=%s, hash=0x%08X]",
+    return String.format("MensagemCluster[%s de No %d | ep=%d, v=%d, est=%s, hash=0x%08X]",
         tipo, idOrigem, epoca, versao, estadoOrigem, hash);
   }
 }

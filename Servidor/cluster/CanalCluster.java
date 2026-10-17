@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: CanalCluster
 * Funcao.............: Gerenciador de conexoes TCP ponto-a-ponto entre servidores com reconexao automatica.
 *************************************************************** */
@@ -160,9 +160,9 @@ public class CanalCluster {
         saida.oos = oos;
       }
       visao.marcarConectado(saida.id, true);
-      System.out.println("[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó " + saida.id + " (" + saida.host + ":" + saida.porta + ")");
+      System.out.println("[CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o No " + saida.id + " (" + saida.host + ":" + saida.porta + ")");
 
-      // Envia HELLO de apresentacao imediato com dados do nó
+      // Envia HELLO de apresentacao imediato com dados do no
       MensagemCluster hello = new MensagemCluster(TipoMensagemCluster.HELLO, config.getMeuId());
       ConfigCluster.NoInfo meuInfo = config.getMeuNoInfo();
       if (meuInfo != null) {
@@ -180,7 +180,7 @@ public class CanalCluster {
   }
 
   /**
-   * Envia uma mensagem para um nó especifico via conexao de saida.
+   * Envia uma mensagem para um no especifico via conexao de saida.
    */
   public boolean enviar(int idDestino, MensagemCluster msg) {
     SaidaPar saida = conexoesSaida.get(idDestino);
@@ -195,7 +195,7 @@ public class CanalCluster {
         saida.oos.flush();
         return true;
       } catch (Exception e) {
-        System.err.println("[CLUSTER:TCP] [WARNING] Falha ao enviar para Nó " + idDestino + ": " + e.getMessage());
+        System.err.println("[CLUSTER:TCP] [WARNING] Falha ao enviar para No " + idDestino + ": " + e.getMessage());
         saida.fechar();
         visao.marcarDown(idDestino);
         return false;
@@ -238,7 +238,7 @@ public class CanalCluster {
               MensagemCluster msg = (MensagemCluster) obj;
               this.ultimoParId = msg.getIdOrigem();
 
-              // Auto-descoberta e registro dinamico se o nó nao for previamente conhecido
+              // Auto-descoberta e registro dinamico se o no nao for previamente conhecido
               if (msg.getIdOrigem() > 0 && msg.getIdOrigem() != config.getMeuId()) {
                 String hostOrig = (msg.getHostOrigem() != null && !msg.getHostOrigem().isEmpty())
                     ? msg.getHostOrigem()

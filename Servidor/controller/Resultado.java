@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Resultado
 * Funcao.............: Modela o retorno deterministico da execucao de uma Operacao no GerenciadorGrupos.
 *************************************************************** */

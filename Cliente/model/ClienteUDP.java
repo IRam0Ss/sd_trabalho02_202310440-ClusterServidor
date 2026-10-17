@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: ClienteUDP
 * Funcao.............: Gerencia o envio e recepcao assincrona de datagramas UDP com alvo mutavel para failover.
 *************************************************************** */

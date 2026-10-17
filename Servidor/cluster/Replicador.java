@@ -2,9 +2,9 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Replicador
-* Funcao.............: Gerenciador de replicacao sincrona de estado com confirmacao de todos os nós (D2) e snapshots.
+* Funcao.............: Gerenciador de replicacao sincrona de estado com confirmacao de todos os nos (D2) e snapshots.
 *************************************************************** */
 
 package cluster;
@@ -27,7 +27,7 @@ import controller.Resultado;
 /**
  * Responsavel pela replicacao sincrona deterministica entre lider e seguidores.
  * Garante que uma operacao so seja respondida ao cliente apos ter sido confirmada
- * por TODOS os nós vivos em standby sincronizado (D2).
+ * por TODOS os nos vivos em standby sincronizado (D2).
  * 
  * @author Iury Ramos Sodre (Matricula: 202310440)
  * @version 1.0
@@ -97,7 +97,7 @@ public class Replicador {
       }
 
       if (alvos.isEmpty()) {
-        // Unico nó vivo no cluster: aplica localmente e retorna
+        // Unico no vivo no cluster: aplica localmente e retorna
         return resultado;
       }
 
@@ -121,7 +121,7 @@ public class Replicador {
         if (!todosConfirmaram) {
           System.err.println("[REPLICADOR] [WARNING] Timeout de ACK na versao " + versaoOp
               + ". Standbys sem resposta: " + info.pendentes);
-          // Marca nós sem resposta como DOWN
+          // Marca nos sem resposta como DOWN
           for (int semResposta : info.pendentes) {
             visao.marcarDown(semResposta);
           }
@@ -189,7 +189,7 @@ public class Replicador {
   }
 
   /**
-   * Envia snapshot do estado atual para um nó que solicitou sincronizacao.
+   * Envia snapshot do estado atual para um no que solicitou sincronizacao.
    */
   public void enviarSnapshot(int idDestino, long epocaAtual) {
     lockReplicacao.lock();
@@ -202,7 +202,7 @@ public class Replicador {
       snap.setPayload(dados);
       canal.enviar(idDestino, snap);
       System.out.println("[REPLICADOR] [INFO] Snapshot (v=" + gerenciador.getVersao() + ", "
-          + dados.length + " bytes) enviado ao Nó " + idDestino);
+          + dados.length + " bytes) enviado ao No " + idDestino);
     } finally {
       lockReplicacao.unlock();
     }

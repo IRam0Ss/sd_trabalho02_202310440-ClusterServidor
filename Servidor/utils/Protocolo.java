@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 18/09/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: Protocolo
 * Funcao.............: Centraliza as constantes de operacoes, codigos de resposta e configuracoes de rede.
 *************************************************************** */
@@ -73,7 +73,7 @@ public class Protocolo {
   /** Codigo STANDBY: resposta quando o servidor contatado nao e o lider ativo */
   public static final String STANDBY = "STANDBY";
 
-  /** Consulta discovery para descoberta de nós do cluster */
+  /** Consulta discovery para descoberta de nos do cluster */
   public static final String DISCOVER_EDEN_CLUSTER = "DISCOVER_EDEN_CLUSTER";
 
   /** Codigo de operacao para respostas de sucesso do servidor */

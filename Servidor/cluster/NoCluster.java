@@ -2,9 +2,9 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: NoCluster
-* Funcao.............: Orquestrador da maquina de estados do nó no cluster, eleicao sem preempcao (D1) e ciclo de vida.
+* Funcao.............: Orquestrador da maquina de estados do no no cluster, eleicao sem preempcao (D1) e ciclo de vida.
 *************************************************************** */
 
 package cluster;
@@ -22,7 +22,7 @@ import model.Servidor;
 import utils.Protocolo;
 
 /**
- * Controla o papel do nó (ATIVO, STANDBY, SINCRONIZANDO, CANDIDATO), a eleicao de lideres,
+ * Controla o papel do no (ATIVO, STANDBY, SINCRONIZANDO, CANDIDATO), a eleicao de lideres,
  * os heartbeats periodicos e a ativacao/desativacao dinamica das portas de atendimento.
  * 
  * @author Iury Ramos Sodre (Matricula: 202310440)
@@ -105,13 +105,13 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
           if (!ativoCaiu && idLiderAtivo > 0 && idLiderAtivo != config.getMeuId()) {
             VisaoCluster.ParEstado liderSt = visao.getPar(idLiderAtivo);
             if (liderSt != null && (!liderSt.conectado || "DOWN".equalsIgnoreCase(liderSt.estado))) {
-              ClusterLog.aviso("ELEIÇÃO", "Líder ativo conhecido (Nó " + idLiderAtivo + ") caiu ou está inacessível.");
+              ClusterLog.aviso("ELEICAO", "Lider ativo conhecido (No " + idLiderAtivo + ") caiu ou esta inacessivel.");
               ativoCaiu = true;
             }
           }
 
           if (ativoCaiu && !"ATIVO".equalsIgnoreCase(papel)) {
-            ClusterLog.eleicao("Líder ausente. Disparando eleição para novo líder...");
+            ClusterLog.eleicao("Lider ausente. Disparando eleicao para novo lider...");
             int antigoLider = this.idLiderAtivo;
             this.idLiderAtivo = -1;
             if (antigoLider > 0) {
@@ -166,14 +166,14 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
     // Verifica se ha algum lider ativo nos pares
     int ativoConhecido = visao.getIdAtivoAtual();
     if (ativoConhecido > 0) {
-      ClusterLog.info("CLUSTER", "Líder ativo detectado no Nó " + ativoConhecido + ". Solicitando sincronização...");
+      ClusterLog.info("CLUSTER", "Lider ativo detectado no No " + ativoConhecido + ". Solicitando sincronizacao...");
       this.idLiderAtivo = ativoConhecido;
       this.papel = "SINCRONIZANDO";
       MensagemCluster pedido = new MensagemCluster(TipoMensagemCluster.PEDIDO_SYNC, config.getMeuId());
       pedido.setVersao(gerenciador.getVersao());
       canal.enviar(ativoConhecido, pedido);
     } else {
-      // Se algum nó com menor ID existir e estiver conectando/vivo, aguarda por ele ou fica em STANDBY
+      // Se algum no com menor ID existir e estiver conectando/vivo, aguarda por ele ou fica em STANDBY
       int meuId = config.getMeuId();
       boolean temMenorIdEsperado = false;
       for (ConfigCluster.NoInfo outro : config.getOutrosNos()) {
@@ -188,10 +188,10 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
       }
 
       if (temMenorIdEsperado) {
-        return; // Aguarda o nó de menor ID se apresentar ou assumir
+        return; // Aguarda o no de menor ID se apresentar ou assumir
       }
 
-      ClusterLog.lider("Nenhum líder ativo encontrado na rede. Assumindo liderança pioneira (Nó " + meuId + ")...");
+      ClusterLog.lider("Nenhum lider ativo encontrado na rede. Assumindo lideranca pioneira (No " + meuId + ")...");
       assumirComoAtivo();
     }
   }
@@ -221,7 +221,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
           }
         }
 
-        ClusterLog.eleicao("Avaliando candidatos elegíveis vivos...");
+        ClusterLog.eleicao("Avaliando candidatos elegiveis vivos...");
         List<VisaoCluster.ParEstado> elegiveis = visao.getParesElegiveis();
 
         long minhaVersao = gerenciador.getVersao();
@@ -241,14 +241,14 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
         if (souMelhor) {
           this.papel = "CANDIDATO";
           this.epoca = Math.max(this.epoca, visao.getMaiorEpocaConhecida()) + 1;
-          ClusterLog.eleicao("Sou o melhor candidato (Versão: " + minhaVersao
-              + ", ID: " + meuId + "). Enviando PROPOSTA na época " + epoca + "...");
+          ClusterLog.eleicao("Sou o melhor candidato (Versao: " + minhaVersao
+              + ", ID: " + meuId + "). Enviando PROPOSTA na epoca " + epoca + "...");
 
           List<VisaoCluster.ParEstado> alvos = visao.getParesVivos();
           alvos.removeIf(p -> p.id == meuId || !p.conectado || "DOWN".equalsIgnoreCase(p.estado));
 
           if (alvos.isEmpty()) {
-            ClusterLog.lider("Nenhum outro nó ativo contactável (demais nós DOWN). Assumindo liderança como sobrevivente.");
+            ClusterLog.lider("Nenhum outro no ativo contactavel (demais nos DOWN). Assumindo lideranca como sobrevivente.");
             assumirComoAtivo();
             return;
           }
@@ -265,21 +265,21 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
           boolean venceu = latchVotos.await(2000, TimeUnit.MILLISECONDS);
           if (venceu || latchVotos.getCount() == 0) {
             if ("CANDIDATO".equalsIgnoreCase(this.papel)) {
-              ClusterLog.lider("Votos obtidos da maioria dos pares! Assumindo liderança ativa do cluster.");
+              ClusterLog.lider("Votos obtidos da maioria dos pares! Assumindo lideranca ativa do cluster.");
               assumirComoAtivo();
             }
           } else {
-            ClusterLog.aviso("ELEIÇÃO", "Timeout de votação. Voltando para STANDBY.");
+            ClusterLog.aviso("ELEICAO", "Timeout de votacao. Voltando para STANDBY.");
             if ("CANDIDATO".equalsIgnoreCase(this.papel)) {
               this.papel = "STANDBY";
             }
           }
         } else {
-          ClusterLog.standby("Outro nó tem maior prioridade para liderança. Aguardando anúncio de COORDENADOR...");
+          ClusterLog.standby("Outro no tem maior prioridade para lideranca. Aguardando anuncio de COORDENADOR...");
           this.papel = "STANDBY";
         }
       } catch (Exception e) {
-        ClusterLog.erro("ELEIÇÃO", "Falha no processo de eleição: " + e.getMessage());
+        ClusterLog.erro("ELEICAO", "Falha no processo de eleicao: " + e.getMessage());
       } finally {
         eleicaoEmAndamento.set(false);
       }
@@ -287,7 +287,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
   }
 
   /**
-   * Promove o nó para ATIVO: abre portas de atendimento e notifica os clientes.
+   * Promove o no para ATIVO: abre portas de atendimento e notifica os clientes.
    */
   public synchronized void assumirComoAtivo() {
     this.papel = "ATIVO";
@@ -297,7 +297,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
     boolean incluirLegado = (config.getMeuId() == 1);
     servidor.iniciarServicos(info.portaTcp, info.portaUdp, info.portaDiscovery, incluirLegado, config.getMeuId());
 
-    ClusterLog.lider(String.format("Nó %d assumiu coordenação do cluster (Época: %d, Versão: %d, Hash: %s)",
+    ClusterLog.lider(String.format("No %d assumiu coordenacao do cluster (Epoca: %d, Versao: %d, Hash: %s)",
         config.getMeuId(), epoca, gerenciador.getVersao(), gerenciador.calcularHash()));
 
     // Envia COORDENADOR para todos os pares
@@ -323,12 +323,12 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
   }
 
   /**
-   * Rebaixa o nó para STANDBY: fecha portas de servico e redireciona clientes se necessario.
+   * Rebaixa o no para STANDBY: fecha portas de servico e redireciona clientes se necessario.
    */
   public synchronized void rebaixarParaStandby(int novoLider, long novaEpoca) {
     gerenciador.setListenerReplicacao(null);
     if ("ATIVO".equalsIgnoreCase(this.papel)) {
-      ClusterLog.aviso("CLUSTER", "Rebaixando de ATIVO para STANDBY. Novo líder: Nó " + novoLider);
+      ClusterLog.aviso("CLUSTER", "Rebaixando de ATIVO para STANDBY. Novo lider: No " + novoLider);
       ConfigCluster.NoInfo infoNovoLider = config.getNos().get(novoLider);
       if (infoNovoLider != null) {
         NotificadorClientes.notificarServerChanged(
@@ -348,7 +348,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
   }
 
   /**
-   * Resolve deterministica e simetricamente conflito de lideranca (dois nós operando como ATIVO).
+   * Resolve deterministica e simetricamente conflito de lideranca (dois nos operando como ATIVO).
    * Hierarquia estrita: Versao dos Dados > Epoca > Menor ID.
    */
   private synchronized void resolverConflitoLideranca(MensagemCluster msg) {
@@ -358,29 +358,29 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
     long parEpoca = msg.getEpoca();
 
     ClusterLog.conflito(String.format(
-        "Dois nós operando como ATIVO! Local: [ID %d, Versão=%d, Época=%d] vs Remoto: [Nó %d, Versão=%d, Época=%d]",
+        "Dois nos operando como ATIVO! Local: [ID %d, Versao=%d, Epoca=%d] vs Remoto: [No %d, Versao=%d, Epoca=%d]",
         config.getMeuId(), minhaVersao, this.epoca, parId, versaoPar, parEpoca));
 
     boolean euVenci;
-    // CRITÉRIO 1: Versão dos dados (Histórico de operações persistidas)
+    // CRITERIO 1: Versao dos dados (Historico de operacoes persistidas)
     if (minhaVersao > versaoPar) {
       euVenci = true;
     } else if (minhaVersao < versaoPar) {
       euVenci = false;
     } else {
-      // CRITÉRIO 2: Época
+      // CRITERIO 2: Epoca
       if (this.epoca > parEpoca) {
         euVenci = true;
       } else if (this.epoca < parEpoca) {
         euVenci = false;
       } else {
-        // CRITÉRIO 3: Desempate determinístico por menor ID
+        // CRITERIO 3: Desempate deterministico por menor ID
         euVenci = (config.getMeuId() < parId);
       }
     }
 
     if (euVenci) {
-      ClusterLog.cura(String.format("Nó %d prevalece como Líder ATIVO. Impondo coordenação ao Nó %d.",
+      ClusterLog.cura(String.format("No %d prevalece como Lider ATIVO. Impondo coordenacao ao No %d.",
           config.getMeuId(), parId));
       this.epoca = Math.max(this.epoca, parEpoca) + 1;
       ConfigCluster.NoInfo info = config.getMeuNoInfo();
@@ -391,7 +391,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
       coord.setPortaUdpServico(info.portaUdp);
       canal.broadcast(coord);
     } else {
-      ClusterLog.cura(String.format("Nó %d cede liderança ao Nó %d (vencedor). Rebaixando para STANDBY e sincronizando snapshot.",
+      ClusterLog.cura(String.format("No %d cede lideranca ao No %d (vencedor). Rebaixando para STANDBY e sincronizando snapshot.",
           config.getMeuId(), parId));
       rebaixarParaStandby(parId, Math.max(this.epoca, parEpoca));
       this.papel = "SINCRONIZANDO";
@@ -409,7 +409,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
   public void onMensagemRecebida(MensagemCluster msg) {
     if (msg == null) return;
 
-    // Garante que novos nós descobertos dinamicamente sejam registrados
+    // Garante que novos nos descobertos dinamicamente sejam registrados
     if (msg.getIdOrigem() > 0 && msg.getIdOrigem() != config.getMeuId()) {
       String hostOrig = (msg.getHostOrigem() != null && !msg.getHostOrigem().isEmpty()) ? msg.getHostOrigem() : "127.0.0.1";
       int pCluster = (msg.getPortaClusterOrigem() > 0) ? msg.getPortaClusterOrigem() : (9000 + msg.getIdOrigem());
@@ -435,7 +435,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
         msg.getPortaUdpServico()
     );
 
-    // Se receber qualquer mensagem com epoca maior, verifica se há conflito de lideres ativos ou atualiza epoca
+    // Se receber qualquer mensagem com epoca maior, verifica se ha conflito de lideres ativos ou atualiza epoca
     if (msg.getEpoca() > this.epoca) {
       if ("ATIVO".equalsIgnoreCase(this.papel) && "ATIVO".equalsIgnoreCase(msg.getEstadoOrigem()) && msg.getIdOrigem() != config.getMeuId()) {
         resolverConflitoLideranca(msg);
@@ -487,19 +487,19 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
             byte[] dados = (byte[]) msg.getPayload();
             replicador.instalarSnapshot(dados, msg.getEpoca(), msg.getVersao());
             this.epoca = msg.getEpoca();
-            this.papel = "STANDBY"; // Nó sincronizado entra como STANDBY (D1)
+            this.papel = "STANDBY"; // No sincronizado entra como STANDBY (D1)
             this.idLiderAtivo = msg.getIdOrigem();
 
             MensagemCluster ok = new MensagemCluster(TipoMensagemCluster.SYNC_OK, config.getMeuId());
             ok.setVersao(gerenciador.getVersao());
             canal.enviar(msg.getIdOrigem(), ok);
-            ClusterLog.standby("Sincronização concluída com sucesso. Nó operando em STANDBY.");
+            ClusterLog.standby("Sincronizacao concluida com sucesso. No operando em STANDBY.");
           }
         }
         break;
 
       case SYNC_OK:
-        ClusterLog.info("CLUSTER", "Nó " + msg.getIdOrigem() + " sincronizou com sucesso e está em STANDBY.");
+        ClusterLog.info("CLUSTER", "No " + msg.getIdOrigem() + " sincronizou com sucesso e esta em STANDBY.");
         break;
 
       case PROPOSTA:
@@ -518,7 +518,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
         if ("ATIVO".equalsIgnoreCase(this.papel) && msg.getIdOrigem() != config.getMeuId()) {
           resolverConflitoLideranca(msg);
         } else if (msg.getEpoca() >= this.epoca) {
-          ClusterLog.lider("Novo líder anunciado: Nó " + msg.getIdOrigem() + " (Época: " + msg.getEpoca() + ", Versão: " + msg.getVersao() + ")");
+          ClusterLog.lider("Novo lider anunciado: No " + msg.getIdOrigem() + " (Epoca: " + msg.getEpoca() + ", Versao: " + msg.getVersao() + ")");
           this.idLiderAtivo = msg.getIdOrigem();
           this.epoca = msg.getEpoca();
           if ("ATIVO".equalsIgnoreCase(this.papel) && msg.getIdOrigem() != config.getMeuId()) {
@@ -526,7 +526,7 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
           } else if (!"ATIVO".equalsIgnoreCase(this.papel)) {
             this.papel = "STANDBY";
             if (gerenciador.getVersao() < msg.getVersao()) {
-              ClusterLog.info("CLUSTER", "Versão local (" + gerenciador.getVersao() + ") defasada em relação ao líder (" + msg.getVersao() + "). Solicitando SNAPSHOT...");
+              ClusterLog.info("CLUSTER", "Versao local (" + gerenciador.getVersao() + ") defasada em relacao ao lider (" + msg.getVersao() + "). Solicitando SNAPSHOT...");
               this.papel = "SINCRONIZANDO";
               MensagemCluster pedido = new MensagemCluster(TipoMensagemCluster.PEDIDO_SYNC, config.getMeuId());
               pedido.setVersao(gerenciador.getVersao());
@@ -534,23 +534,23 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
             }
           }
         } else {
-          ClusterLog.aviso("CLUSTER", "Ignorando COORDENADOR obsoleto do Nó " + msg.getIdOrigem()
-              + " (Época " + msg.getEpoca() + " < Minha " + this.epoca + ")");
+          ClusterLog.aviso("CLUSTER", "Ignorando COORDENADOR obsoleto do No " + msg.getIdOrigem()
+              + " (Epoca " + msg.getEpoca() + " < Minha " + this.epoca + ")");
         }
         break;
 
       case RENUNCIA:
-        ClusterLog.info("CLUSTER", "Líder Nó " + msg.getIdOrigem() + " renunciou graciosamente. Disparando eleição imediata.");
+        ClusterLog.info("CLUSTER", "Lider No " + msg.getIdOrigem() + " renunciou graciosamente. Disparando eleicao imediata.");
         visao.marcarDown(msg.getIdOrigem());
         this.idLiderAtivo = -1;
         dispararEleicao();
         break;
 
       case SAINDO:
-        ClusterLog.info("CLUSTER", "Nó " + msg.getIdOrigem() + " anunciou saída do cluster.");
+        ClusterLog.info("CLUSTER", "No " + msg.getIdOrigem() + " anunciou saida do cluster.");
         visao.marcarDown(msg.getIdOrigem());
         if (msg.getIdOrigem() == this.idLiderAtivo) {
-          ClusterLog.eleicao("Líder ativo Nó " + msg.getIdOrigem() + " saindo do cluster. Disparando eleição imediata!");
+          ClusterLog.eleicao("Lider ativo No " + msg.getIdOrigem() + " saindo do cluster. Disparando eleicao imediata!");
           this.idLiderAtivo = -1;
           dispararEleicao();
         }
@@ -603,12 +603,12 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
   }
 
   /**
-   * Encerramento gracioso do nó com aviso imediato aos pares (RENUNCIA / SAINDO).
+   * Encerramento gracioso do no com aviso imediato aos pares (RENUNCIA / SAINDO).
    */
   public void encerrar() {
     this.executando = false;
     if ("ATIVO".equalsIgnoreCase(this.papel)) {
-      ClusterLog.info("CLUSTER", "Enviando RENÚNCIA aos pares antes de encerrar...");
+      ClusterLog.info("CLUSTER", "Enviando RENUNCIA aos pares antes de encerrar...");
       MensagemCluster renuncia = new MensagemCluster(TipoMensagemCluster.RENUNCIA, config.getMeuId());
       canal.broadcast(renuncia);
       servidor.pararServicos();
@@ -617,6 +617,6 @@ public class NoCluster implements CanalCluster.ReceptorMensagemCluster {
       canal.broadcast(saindo);
     }
     canal.fechar();
-    ClusterLog.info("CLUSTER", "Nó " + config.getMeuId() + " encerrado com sucesso.");
+    ClusterLog.info("CLUSTER", "No " + config.getMeuId() + " encerrado com sucesso.");
   }
 }

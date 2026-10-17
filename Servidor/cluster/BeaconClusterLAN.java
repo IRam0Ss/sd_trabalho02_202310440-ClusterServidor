@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: BeaconClusterLAN
 * Funcao.............: Farol UDP em broadcast para auto-descoberta dinamica de servidores e atribuicao de ID na rede local.
 *************************************************************** */
@@ -103,7 +103,7 @@ public class BeaconClusterLAN {
   }
 
   /**
-   * Realiza uma sondagem na rede e retorna todos os nós que responderem dentro de 800ms.
+   * Realiza uma sondagem na rede e retorna todos os nos que responderem dentro de 800ms.
    */
   public static Map<Integer, ConfigCluster.NoInfo> sondarParesNaRede(String meuIp, int portaCluster, int portaTcp, int portaUdp) {
     Map<Integer, ConfigCluster.NoInfo> paresEncontrados = new HashMap<>();
@@ -154,7 +154,7 @@ public class BeaconClusterLAN {
   }
 
   /**
-   * Inicia o servico de escuta em segundo plano para responder a novos nós que chegarem.
+   * Inicia o servico de escuta em segundo plano para responder a novos nos que chegarem.
    */
   public void iniciar() {
     Thread t = new Thread(() -> {
@@ -231,7 +231,7 @@ public class BeaconClusterLAN {
     t.setDaemon(true);
     t.start();
 
-    // Envia aviso de JOIN para todos os outros nós na rede
+    // Envia aviso de JOIN para todos os outros nos na rede
     anunciarPresenca();
   }
 

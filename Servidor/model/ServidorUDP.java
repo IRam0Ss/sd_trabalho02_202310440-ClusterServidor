@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: ServidorUDP
 * Funcao.............: Servico de recepcao e roteamento de datagramas UDP com controle de ciclo de vida e estado centralizado.
 *************************************************************** */
@@ -32,7 +32,7 @@ import utils.Protocolo;
 /**
  * Servico responsavel pelo recebimento, deserializacao e roteamento de datagramas UDP.
  * O rastreamento de donos e agregacao de confirmacoes reside integralmente
- * no {@link GerenciadorGrupos}, permitindo replicacao total entre os nós do cluster.
+ * no {@link GerenciadorGrupos}, permitindo replicacao total entre os nos do cluster.
  * 
  * @author Iury Ramos Sodre (Matricula: 202310440)
  * @version 3.0

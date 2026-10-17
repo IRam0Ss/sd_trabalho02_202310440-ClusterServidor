@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: TipoMensagemCluster
 * Funcao.............: Tipos de mensagens trocadas no canal de comunicacao entre servidores.
 *************************************************************** */

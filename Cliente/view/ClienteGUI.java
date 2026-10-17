@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/06/2026
-* Ultima alteracao...: 18/09/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: ClienteGUI
 * Funcao.............: Interface Grafica (JavaFX) principal do Cliente E.D.E.N, gerenciando paineis, temas e chats.
 *************************************************************** */
@@ -472,7 +472,7 @@ public class ClienteGUI extends Application implements MessageListener {
             btnDiscover.setText("Nao achou");
             txtIpServidor.setPromptText("Nao achou, digite o IP...");
           } else {
-            // Seleciona automaticamente o nó do cluster encontrado
+            // Seleciona automaticamente o no do cluster encontrado
             txtIpServidor.setText(alvoCluster);
             ultimoEnderecoCluster = alvoCluster;
             ipServidor = alvoCluster;
@@ -552,7 +552,7 @@ public class ClienteGUI extends Application implements MessageListener {
       if (sub.length == 1) {
         // Se foi passado apenas o IP/Host sem porta (ex: "127.0.0.1" ou "localhost")
         if ("127.0.0.1".equals(host) || "localhost".equalsIgnoreCase(host)) {
-          // Adiciona portas de cluster local (nos 1 a 10) para encontrar o nó lider ativo
+          // Adiciona portas de cluster local (nos 1 a 10) para encontrar o no lider ativo
           for (int k = 1; k <= 10; k++) {
             int pTcp = 6789 + 10 * (k - 1);
             int pUdp = 7777 + 10 * (k - 1);

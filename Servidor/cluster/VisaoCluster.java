@@ -2,7 +2,7 @@
 * Autor..............: Iury Ramos Sodre
 * Matricula..........: 202310440
 * Inicio.............: 15/10/2026
-* Ultima alteracao...: 15/10/2026
+* Ultima alteracao...: 17/10/2026
 * Nome...............: VisaoCluster
 * Funcao.............: Tabela em memoria do estado de conectividade, versao e papel de todos os pares.
 *************************************************************** */
@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Mantem a visao local do estado de saude, papel, versao e latencia
- * de todos os nós conhecidos do cluster.
+ * de todos os nos conhecidos do cluster.
  * 
  * @author Iury Ramos Sodre (Matricula: 202310440)
  * @version 1.0
@@ -80,7 +80,7 @@ public class VisaoCluster implements Serializable {
   public synchronized void adicionarParSeAusente(ConfigCluster.NoInfo info) {
     if (info != null && info.id != meuId && !pares.containsKey(info.id)) {
       pares.put(info.id, new ParEstado(info));
-      System.out.println("[VISAO] Nó " + info.id + " adicionado a tabela de saude do cluster.");
+      System.out.println("[VISAO] No " + info.id + " adicionado a tabela de saude do cluster.");
     }
   }
 
@@ -117,10 +117,10 @@ public class VisaoCluster implements Serializable {
   }
 
   /**
-   * Verifica expiracao de heartbeats e marca como DOWN nós que nao responderam no prazo.
+   * Verifica expiracao de heartbeats e marca como DOWN nos que nao responderam no prazo.
    * 
    * @param timeoutMs Tempo maximo sem heartbeat (ex: 3000 ms).
-   * @return true se o nó que caiu era o ATIVO (engatilhando nova eleicao).
+   * @return true se o no que caiu era o ATIVO (engatilhando nova eleicao).
    */
   public synchronized boolean verificarTimeouts(long timeoutMs) {
     long agora = System.currentTimeMillis();
@@ -128,12 +128,12 @@ public class VisaoCluster implements Serializable {
 
     for (ParEstado p : pares.values()) {
       if ("ATIVO".equalsIgnoreCase(p.estado) && (!p.conectado || agora - p.ultimoHeartbeat > timeoutMs)) {
-        System.out.println("[CLUSTER] [WARNING] Lider ATIVO (Nó " + p.id + ") desconectado ou sem heartbeat -> Marcado como DOWN");
+        System.out.println("[CLUSTER] [WARNING] Lider ATIVO (No " + p.id + ") desconectado ou sem heartbeat -> Marcado como DOWN");
         ativoCaiu = true;
         p.estado = "DOWN";
         p.conectado = false;
       } else if (p.isVivo() && (agora - p.ultimoHeartbeat > timeoutMs)) {
-        System.out.println("[CLUSTER] [WARNING] Nó " + p.id + " sem heartbeat ha " + (agora - p.ultimoHeartbeat)
+        System.out.println("[CLUSTER] [WARNING] No " + p.id + " sem heartbeat ha " + (agora - p.ultimoHeartbeat)
             + "ms -> Marcado como DOWN (era: " + p.estado + ")");
         p.estado = "DOWN";
         p.conectado = false;
