@@ -67,6 +67,53 @@ public class GerenciadorGrupos implements Serializable {
     this.versao = 0;
   }
 
+  private volatile boolean ativo = true;
+  private final Map<String, Object> sessoesAtivas = new java.util.concurrent.ConcurrentHashMap<>();
+
+  public void setAtivo(boolean ativo) {
+    this.ativo = ativo;
+    if (!ativo) {
+      sessoesAtivas.clear();
+    }
+  }
+
+  public boolean isAtivo() {
+    return this.ativo;
+  }
+
+  public void vincularSessao(String nomeUsuario, Object sessao) {
+    if (nomeUsuario == null || sessao == null) return;
+    sessoesAtivas.put(normalizar(nomeUsuario), sessao);
+  }
+
+  public void desvincularSessao(String nomeUsuario, Object sessao) {
+    if (nomeUsuario == null || sessao == null) return;
+    sessoesAtivas.remove(normalizar(nomeUsuario), sessao);
+  }
+
+  /**
+   * Remove com seguranca um cliente que perdeu a conexao TCP, garantindo que
+   * clientes que ja reconectaram com outra sessao nao sejam derrubados por engano.
+   */
+  public synchronized Resultado desconectarClienteInativo(String nomeUsuario, Object sessao) {
+    if (!ativo) {
+      return Resultado.ok("Servidor nao ativo");
+    }
+    if (nomeUsuario == null || sessao == null) {
+      return Resultado.ok("Nenhum usuario");
+    }
+    String norm = normalizar(nomeUsuario);
+    Object sessaoAtual = sessoesAtivas.get(norm);
+    if (sessaoAtual != null && sessaoAtual != sessao) {
+      System.out.println("[GERENCIADOR] [INFO] Desconexao ignorada para '" + nomeUsuario + "' pois usuario ja possui nova sessao ativa.");
+      return Resultado.ok("Sessao ja renovada");
+    }
+    sessoesAtivas.remove(norm);
+
+    Operacao op = Operacao.removerUsuario("auto-disconnect-" + System.currentTimeMillis() + "-" + norm, nomeUsuario);
+    return aplicar(op);
+  }
+
   private String normalizar(String str) {
     return (str != null) ? str.trim().toLowerCase() : "";
   }
@@ -220,11 +267,13 @@ public class GerenciadorGrupos implements Serializable {
     String norm = normalizar(nome);
     InfoUser removido = usuarios.remove(norm);
 
+    boolean membroRemovidoDeAlgumGrupo = false;
     List<String> gruposParaRemover = new ArrayList<>();
     for (Map.Entry<String, LinkedHashSet<String>> entry : grupos.entrySet()) {
       String nomeGrupo = entry.getKey();
       LinkedHashSet<String> membros = entry.getValue();
       if (membros.remove(norm)) {
+        membroRemovidoDeAlgumGrupo = true;
         System.out.println("[GERENCIADOR] [INFO] Usuario '" + nome + "' removido do grupo '" + nomeGrupo + "'.");
         if (membros.isEmpty()) {
           gruposParaRemover.add(nomeGrupo);
@@ -236,8 +285,9 @@ public class GerenciadorGrupos implements Serializable {
       System.out.println("[GERENCIADOR] [INFO] Grupo '" + g + "' deletado pois ficou vazio.");
     }
 
-    System.out.println("[GERENCIADOR] [INFO] Usuario '" + nome + "' desconectado do servidor. Versao: " + versao);
-    return Resultado.ok("Desconectado com sucesso", removido != null);
+    boolean notificar = (removido != null) || membroRemovidoDeAlgumGrupo || !gruposParaRemover.isEmpty();
+    System.out.println("[GERENCIADOR] [INFO] Usuario '" + nome + "' desconectado do servidor. Notificar clientes: " + notificar + " | Versao: " + versao);
+    return Resultado.ok("Desconectado com sucesso", notificar);
   }
 
   private Resultado aplicarEntrarGrupo(Operacao op) {

@@ -117,6 +117,7 @@ public class Servidor {
     }
 
     this.servicosAtivos = true;
+    this.gerenciador.setAtivo(true);
     System.out.println("=== SERVICOS DE ATENDIMENTO ABERTOS (PAPEL: ATIVO) ===");
     imprimirEnderecosLocais();
     System.out.println("TCP escutando em " + portaTcp);
@@ -133,6 +134,7 @@ public class Servidor {
       return;
     }
     System.out.println("[SERVIDOR] [INFO] Fechando portas de servico de atendimento...");
+    this.gerenciador.setAtivo(false);
 
     for (ServidorTCP tcp : servicosTCP) {
       tcp.parar();

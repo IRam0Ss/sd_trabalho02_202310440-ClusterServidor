@@ -1,24 +1,29 @@
-[CONFIG:AUTO] ID atribuido automaticamente: Nó 2 | Portas: Cluster=9002, TCP=6799, UDP=7787
-[CONFIG:AUTO] Nós locais detectados previamente em execucao: Nó 1 
+[16:39:41] [CONFIG:LOCAL] Nó 2 atribuído | Portas: Cluster=9002, TCP=6799, UDP=7787
+[16:39:41] [CONFIG:LOCAL] Nós locais detectados: Nó 1
 
-[SISTEMA] Servidor iniciado com sucesso. Digite 'ajuda' para comandos de depuracao.
+[SISTEMA] Servidor iniciado com sucesso. Digite 'status' ou 'ajuda' para comandos de depuracao.
 
 [CLUSTER:TCP] [INFO] Canal de cluster escutando na porta 9002
 [CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 1 (127.0.0.1:9001)
-[CLUSTER] [INFO] Novo lider anunciado: Nó 1 (Epoca: 0)
-[CONFIG] Novo nó integrado a topologia: Nó 3 (127.0.0.1:9003)
+[16:39:41] [HEARTBEAT] Cluster operacional: 1/2 nós ativos | Líder atual: NENHUM
+[16:39:41] [LÍDER ATIVO] Novo líder anunciado: Nó 1 (Época: 0, Versão: 0)
+[16:39:42] [HEARTBEAT] Cluster operacional: 2/2 nós ativos | Líder atual: Nó 1
+[16:39:42] [CONFIG] Novo nó integrado à topologia: Nó 3 (127.0.0.1:9003)
 [VISAO] Nó 3 adicionado a tabela de saude do cluster.
 [CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 3 (127.0.0.1:9003)
-[CONFIG] Novo nó integrado a topologia: Nó 4 (127.0.0.1:9004)
+[16:39:43] [HEARTBEAT] Cluster operacional: 3/3 nós ativos | Líder atual: Nó 1
+[16:39:44] [CONFIG] Novo nó integrado à topologia: Nó 4 (127.0.0.1:9004)
 [VISAO] Nó 4 adicionado a tabela de saude do cluster.
 [CLUSTER:TCP] [INFO] Conexao de saida estabelecida com o Nó 4 (127.0.0.1:9004)
+[16:39:44] [HEARTBEAT] Cluster operacional: 4/4 nós ativos | Líder atual: Nó 1
 [GERENCIADOR] [INFO] Usuario 'DinamicoAgente' registrado com sucesso. Total ativos: 1 | Versao: 1
 [GERENCIADOR] [INFO] Usuario 'DinamicoAgente' entrou no grupo 'SALA_DINAMICA'. Total: 1 | Versao: 2
-[ELEICAO] [WARNING] Lider ativo conhecido (Nó 1) caiu ou esta inacessivel.
-[ELEICAO] [WARNING] Disparando eleicao para eleger novo lider...
-[ELEICAO] [INFO] Avaliando candidatos elegiveis vivos...
-[ELEICAO] [INFO] Sou o melhor candidato (Versao: 2, ID: 2). Enviando PROPOSTA na epoca 1...
-[ELEICAO] [INFO] Votos obtidos com sucesso! Assumindo lideranca.
+[16:39:47] [HEARTBEAT] Cluster operacional: 3/4 nós ativos | Líder atual: Nó 1
+[16:39:47] [ELEIÇÃO] [AVISO] Líder ativo conhecido (Nó 1) caiu ou está inacessível.
+[16:39:47] [ELEIÇÃO] Líder ausente. Disparando eleição para novo líder...
+[16:39:47] [ELEIÇÃO] Avaliando candidatos elegíveis vivos...
+[16:39:47] [ELEIÇÃO] Sou o melhor candidato (Versão: 2, ID: 2). Enviando PROPOSTA na época 1...
+[16:39:47] [LÍDER ATIVO] Votos obtidos da maioria dos pares! Assumindo liderança ativa do cluster.
 [SERVIDOR:TCP] [INFO] Escutando na porta 6799
 === SERVICOS DE ATENDIMENTO ABERTOS (PAPEL: ATIVO) ===
 Interfaces de rede detectadas:
@@ -27,8 +32,10 @@ UDP escutando em 7787
 Discovery escutando em 8888
 ======================================================
 [SERVIDOR:UDP] [INFO] Escutando na porta 7787
+[16:39:47] [LÍDER ATIVO] Nó 2 assumiu coordenação do cluster (Época: 1, Versão: 2, Hash: 1000324151)
 [DISCOVERY:8888] Farol UDP ligado na porta 8888 aguardando buscas...
 [NOTIFICADOR] [INFO] Notificacao SERVER_CHANGED disparada para 1 clientes.
+[16:39:48] [HEARTBEAT] Cluster operacional: 3/4 nós ativos | Líder atual: Nó 2
 [SERVIDOR:TCP] [INFO] Nova conexao recebida de 127.0.0.1
 [LIVENESS:PING] Heartbeats PING de clientes ativos sendo atendidos normalmente (Total: 1)
 [SERVIDOR:TCP] [INFO] Nova conexao recebida de 127.0.0.1

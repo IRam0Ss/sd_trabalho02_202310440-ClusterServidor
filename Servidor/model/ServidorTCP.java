@@ -61,8 +61,9 @@ public class ServidorTCP implements Runnable {
   @Override
   public void run() {
     try {
-      this.servidorTCP = new ServerSocket(porta);
+      this.servidorTCP = new ServerSocket();
       this.servidorTCP.setReuseAddress(true);
+      this.servidorTCP.bind(new java.net.InetSocketAddress(porta));
       System.out.println("[SERVIDOR:TCP] [INFO] Escutando na porta " + porta);
 
       while (executando && !servidorTCP.isClosed()) {

@@ -65,6 +65,17 @@ import utils.Protocolo;
  */
 public class ClienteGUI extends Application implements MessageListener {
 
+  private static volatile ClienteGUI instanciaAtiva = null;
+
+  public static void executarShutdownHook() {
+    if (instanciaAtiva != null) {
+      try {
+        instanciaAtiva.desconectarLimpo();
+      } catch (Exception ignored) {
+      }
+    }
+  }
+
   private StackPane root;
   private ImageView watermark;
   private ClienteTCP tcp;
@@ -116,6 +127,7 @@ public class ClienteGUI extends Application implements MessageListener {
 
   @Override
   public void start(Stage primaryStage) {
+    instanciaAtiva = this;
     root = new StackPane();
     root.setStyle("-fx-background-color: #1a1e0b;");
 
@@ -2299,7 +2311,7 @@ public class ClienteGUI extends Application implements MessageListener {
     });
   }
 
-  private void desconectarLimpo() {
+  public synchronized void desconectarLimpo() {
     if (eu != null && eu.getNome() != null && !eu.getNome().trim().isEmpty()) {
       this.ultimoCodinome = eu.getNome().trim();
     }
@@ -2337,8 +2349,19 @@ public class ClienteGUI extends Application implements MessageListener {
     chatHistories.clear();
     unreadCounts.clear();
     knownGroupMembers.clear();
-    masterGroupData.clear();
-    masterUsersData.clear();
+    try {
+      if (Platform.isFxApplicationThread()) {
+        masterGroupData.clear();
+        masterUsersData.clear();
+      } else {
+        Platform.runLater(() -> {
+          try {
+            masterGroupData.clear();
+            masterUsersData.clear();
+          } catch (Exception ignored) {}
+        });
+      }
+    } catch (Exception ignored) {}
     currentChat = null;
   }
 

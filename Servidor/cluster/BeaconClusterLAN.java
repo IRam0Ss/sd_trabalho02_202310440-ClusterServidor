@@ -37,6 +37,7 @@ public class BeaconClusterLAN {
 
   public interface ListenerNovoParLAN {
     void onNovoParDescoberto(ConfigCluster.NoInfo novoPar);
+    default void onParSaindo(int idPar) {}
   }
 
   private final int meuId;
@@ -147,7 +148,7 @@ public class BeaconClusterLAN {
         }
       }
     } catch (Exception e) {
-      System.out.println("[BEACON] Aviso durante sondagem inicial: " + e.getMessage());
+      ClusterLog.aviso("BEACON", "Aviso durante sondagem inicial: " + e.getMessage());
     }
     return paresEncontrados;
   }
@@ -162,7 +163,7 @@ public class BeaconClusterLAN {
         socketEscuta.setReuseAddress(true);
         socketEscuta.setBroadcast(true);
         socketEscuta.bind(new java.net.InetSocketAddress(Protocolo.PORTA_CLUSTER_BEACON));
-        System.out.println("[BEACON:LAN] Farol de cluster escutando na porta UDP " + Protocolo.PORTA_CLUSTER_BEACON);
+        ClusterLog.info("BEACON:LAN", "Farol de cluster escutando na porta UDP " + Protocolo.PORTA_CLUSTER_BEACON);
 
         byte[] buffer = new byte[512];
         while (executando && !socketEscuta.isClosed()) {
@@ -205,6 +206,14 @@ public class BeaconClusterLAN {
                   }
                 }
               }
+            } else if (texto.startsWith("EDEN_CLUSTER_LEAVE:")) {
+              String[] p = texto.split(":");
+              if (p.length >= 2) {
+                int idSaiu = Integer.parseInt(p[1]);
+                if (idSaiu != meuId && listener != null) {
+                  listener.onParSaindo(idSaiu);
+                }
+              }
             }
 
           } catch (Exception e) {
@@ -213,7 +222,7 @@ public class BeaconClusterLAN {
         }
       } catch (Exception e) {
         if (executando) {
-          System.err.println("[BEACON:LAN] [ERROR] Falha no socket de beacon LAN: " + e.getMessage());
+          ClusterLog.erro("BEACON:LAN", "Falha no socket de beacon LAN: " + e.getMessage());
         }
       } finally {
         parar();
@@ -243,7 +252,24 @@ public class BeaconClusterLAN {
     }, "Thread-AnunciarPresencaLAN").start();
   }
 
+  public void anunciarSaida() {
+    try (DatagramSocket s = new DatagramSocket()) {
+      s.setBroadcast(true);
+      String msg = String.format("EDEN_CLUSTER_LEAVE:%d", meuId);
+      byte[] dados = msg.getBytes(StandardCharsets.UTF_8);
+      List<InetAddress> bcasts = coletarBroadcasts();
+      for (InetAddress b : bcasts) {
+        try {
+          s.send(new DatagramPacket(dados, dados.length, b, Protocolo.PORTA_CLUSTER_BEACON));
+        } catch (Exception ignored) {}
+      }
+    } catch (Exception ignored) {}
+  }
+
   public void parar() {
+    if (this.executando) {
+      anunciarSaida();
+    }
     this.executando = false;
     if (socketEscuta != null && !socketEscuta.isClosed()) {
       try {

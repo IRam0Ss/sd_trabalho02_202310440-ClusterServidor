@@ -85,16 +85,27 @@ public class AtendimentoCliente implements Runnable {
     } catch (Exception e) {
       System.err.println("[ATENDIMENTO] [INFO] Conexao encerrada com o cliente: " + e.getMessage());
     } finally {
-      // Nao removemos o usuario da lista global ao fechar o socket TCP, pois clientes transientes
-      // abrem e fecham a conexao TCP a cada comando (ficando ativos no UDP).
       try {
-        if (this.saidaObjetos != null) {
-          this.saidaObjetos.close();
+        if (this.usuarioAssociado != null && this.usuarioAssociado.getNome() != null) {
+          String nome = this.usuarioAssociado.getNome();
+          System.out.println("[ATENDIMENTO] [CLEANUP] Cliente '" + nome + "' encerrou conexao TCP bruscamente. Limpando sessoes e grupos...");
+          Resultado res = this.gerenciador.desconectarClienteInativo(nome, this);
+          if (res != null && res.isNotificarAtualizacaoUsuarios()) {
+            NotificadorClientes.notificarAtualizacaoUsuarios(this.gerenciador.getTodosUsuariosAtivos());
+          }
         }
-        if (this.conexao != null && !this.conexao.isClosed()) {
-          this.conexao.close();
+      } catch (Exception e) {
+        System.err.println("[ATENDIMENTO] [ERROR] Falha na limpeza de cliente inativo: " + e.getMessage());
+      } finally {
+        try {
+          if (this.saidaObjetos != null) {
+            this.saidaObjetos.close();
+          }
+          if (this.conexao != null && !this.conexao.isClosed()) {
+            this.conexao.close();
+          }
+        } catch (Exception ignored) {
         }
-      } catch (Exception ignored) {
       }
     }
   }
@@ -136,6 +147,23 @@ public class AtendimentoCliente implements Runnable {
 
     if (comando == null || comando.isEmpty()) {
       return;
+    }
+
+    // Vincula automaticamente a sessao ativa para o usuario remetente se presente
+    String nomeRemetente = apdu.getNomeUsuario();
+    if (nomeRemetente != null && !nomeRemetente.trim().isEmpty()) {
+      String nomeTrim = nomeRemetente.trim();
+      if (nomeTrim.startsWith("@")) {
+        nomeTrim = nomeTrim.substring(1).trim();
+      }
+      if (!nomeTrim.isEmpty()) {
+        this.gerenciador.vincularSessao(nomeTrim, this);
+        if (this.usuarioAssociado == null) {
+          String ipConexao = (conexao != null && conexao.getInetAddress() != null)
+              ? conexao.getInetAddress().getHostAddress() : "127.0.0.1";
+          this.usuarioAssociado = new InfoUser(nomeTrim, ipConexao, apdu.getPortaClienteUDP());
+        }
+      }
     }
 
     switch (comando) {
@@ -185,6 +213,8 @@ public class AtendimentoCliente implements Runnable {
       case Protocolo.LOGOUT:
         Operacao opLogout = Operacao.removerUsuario(apdu.getIdRequisicao(), apdu.getNomeUsuario());
         Resultado resLogout = this.gerenciador.aplicar(opLogout);
+        this.gerenciador.desvincularSessao(apdu.getNomeUsuario(), this);
+        this.usuarioAssociado = null;
         enviarResposta(resLogout.getOperacaoRetorno(), resLogout.getMensagem());
         if (resLogout.isNotificarAtualizacaoUsuarios()) {
           NotificadorClientes.notificarAtualizacaoUsuarios(this.gerenciador.getTodosUsuariosAtivos());
@@ -202,6 +232,8 @@ public class AtendimentoCliente implements Runnable {
         } else {
           Operacao opLeaveGlobal = Operacao.removerUsuario(apdu.getIdRequisicao(), apdu.getNomeUsuario());
           Resultado resLeaveGlobal = this.gerenciador.aplicar(opLeaveGlobal);
+          this.gerenciador.desvincularSessao(apdu.getNomeUsuario(), this);
+          this.usuarioAssociado = null;
           enviarResposta(Protocolo.OK, "Desconectado do servidor");
           if (resLeaveGlobal.isNotificarAtualizacaoUsuarios()) {
             NotificadorClientes.notificarAtualizacaoUsuarios(this.gerenciador.getTodosUsuariosAtivos());

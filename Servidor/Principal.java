@@ -10,6 +10,7 @@
 import java.util.Scanner;
 
 import cluster.BeaconClusterLAN;
+import cluster.ClusterLog;
 import cluster.ConfigCluster;
 import cluster.NoCluster;
 import cluster.VisaoCluster;
@@ -92,9 +93,22 @@ public class Principal {
 
     // Se estiver rodando em modo rede, ativa o beacon de broadcast UDP para novos nós
     if (!"127.0.0.1".equals(config.getMeuNoInfo().host)) {
-      beaconLAN = new BeaconClusterLAN(config, novoPar -> {
-        noCluster.getVisao().adicionarParSeAusente(novoPar);
-        noCluster.getCanal().adicionarParSeAusente(novoPar.id, novoPar.host, novoPar.portaCluster);
+      beaconLAN = new BeaconClusterLAN(config, new BeaconClusterLAN.ListenerNovoParLAN() {
+        @Override
+        public void onNovoParDescoberto(ConfigCluster.NoInfo novoPar) {
+          noCluster.getVisao().adicionarParSeAusente(novoPar);
+          noCluster.getCanal().adicionarParSeAusente(novoPar.id, novoPar.host, novoPar.portaCluster);
+        }
+
+        @Override
+        public void onParSaindo(int idPar) {
+          ClusterLog.info("BEACON:LAN", "Nó " + idPar + " anunciou saída via broadcast LAN.");
+          noCluster.getVisao().marcarDown(idPar);
+          if (idPar == noCluster.getIdLiderAtivo()) {
+            ClusterLog.eleicao("Líder ativo anunciou saída da rede. Disparando eleição imediata!");
+            noCluster.dispararEleicao();
+          }
+        }
       });
       beaconLAN.iniciar();
     }
@@ -113,7 +127,7 @@ public class Principal {
     // Inicia o cluster
     noCluster.iniciar();
 
-    System.out.println("\n[SISTEMA] Servidor iniciado com sucesso. Digite 'ajuda' para comandos de depuracao.\n");
+    System.out.println("\n[SISTEMA] Servidor iniciado com sucesso. Digite 'status' ou 'ajuda' para comandos de depuracao.\n");
 
     // Loop interativo de comandos de console para demonstracao e debug (D5)
     while (true) {
@@ -131,7 +145,8 @@ public class Principal {
 
         switch (comando) {
           case "status":
-            exibirStatus(noCluster, config);
+          case "cluster":
+            exibirStatus(noCluster, config, gerenciador);
             break;
 
           case "estado":
@@ -167,32 +182,24 @@ public class Principal {
     }
   }
 
-  private static void exibirStatus(NoCluster noCluster, ConfigCluster config) {
-    System.out.println("\n=== STATUS DO CLUSTER [Nó " + noCluster.getMeuId() + "] ===");
-    System.out.println("Papel Local: " + noCluster.getPapel() + " | Epoca: " + noCluster.getEpoca());
-    System.out.println("Lider Ativo Conhecido: Nó " + (noCluster.getIdLiderAtivo() > 0 ? noCluster.getIdLiderAtivo() : "NENHUM"));
-    ConfigCluster.NoInfo meuInfo = config.getMeuNoInfo();
-    System.out.printf("Portas Locais: Cluster=%d | TCP=%d | UDP=%d\n", meuInfo.portaCluster, meuInfo.portaTcp, meuInfo.portaUdp);
-    System.out.println("Total de Nós Conhecidos na Topologia: " + config.getNos().size());
-    System.out.println("Heartbeats PING Atendidos (Liveness Clientes): " + AtendimentoCliente.getTotalPingsAtendidos());
-
-    VisaoCluster visao = noCluster.getVisao();
-    System.out.println("Status dos Pares Conhecidos:");
-    for (VisaoCluster.ParEstado p : visao.getTodosPares()) {
-      long deltaHb = (p.ultimoHeartbeat > 0) ? (System.currentTimeMillis() - p.ultimoHeartbeat) : -1;
-      System.out.printf("  [Nó %d] -> %s:%d | Estado: %s | Epoca: %d | Versao: %d | Conectado: %b | Ultimo HB: %s\n",
-          p.id, p.host, p.portaCluster, p.estado, p.epoca, p.versao, p.conectado,
-          deltaHb >= 0 ? (deltaHb + "ms atras") : "nunca");
-    }
-    System.out.println("====================================================\n");
+  private static void exibirStatus(NoCluster noCluster, ConfigCluster config, GerenciadorGrupos gerenciador) {
+    ClusterLog.exibirTabelaStatus(
+        noCluster.getMeuId(),
+        noCluster.getPapel(),
+        noCluster.getEpoca(),
+        noCluster.getIdLiderAtivo(),
+        config.getNos(),
+        noCluster.getVisao().getTodosPares(),
+        gerenciador
+    );
   }
 
   private static void exibirAjuda() {
     System.out.println("\nComandos disponiveis no console:");
-    System.out.println("  status   - Exibe estado local, conexoes do cluster, total de nós e lider ativo.");
-    System.out.println("  estado   - Exibe dump da estrutura replicada (usuarios, salas, bloqueios e hash).");
-    System.out.println("  ajuda    - Mostra esta mensagem de ajuda.");
-    System.out.println("  sair     - Encerra este nó graciosamente com failover imediato para os outros.\n");
+    System.out.println("  status / cluster - Exibe tabela visual do cluster, papéis, épocas, versões e saúde.");
+    System.out.println("  estado           - Exibe dump da estrutura de dados replicada (usuários, salas, ticks).");
+    System.out.println("  ajuda            - Mostra esta mensagem de ajuda.");
+    System.out.println("  sair             - Encerra este nó graciosamente com failover imediato para os outros.\n");
   }
 
 }

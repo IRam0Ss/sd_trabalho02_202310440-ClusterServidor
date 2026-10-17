@@ -26,6 +26,10 @@ public class Principal {
    */
   public static void main(String[] args) {
     System.setProperty("java.net.preferIPv4Stack", "true");
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      System.out.println("\n[CLIENTE] [SISTEMA] Sinal de interrupcao (SIGINT/Ctrl+C) interceptado. Realizando desconexao limpa...");
+      ClienteGUI.executarShutdownHook();
+    }, "Thread-Cliente-ShutdownHook"));
     // Inicia a Aplicacao Grafica JavaFX
     Application.launch(ClienteGUI.class, args);
   }

@@ -103,7 +103,7 @@ public class ConfigCluster implements Serializable {
   public void registrarParDinamico(NoInfo info) {
     if (info != null && !nos.containsKey(info.id)) {
       nos.put(info.id, info);
-      System.out.println("[CONFIG] Novo nó integrado a topologia: Nó " + info.id + " (" + info.host + ":" + info.portaCluster + ")");
+      ClusterLog.info("CONFIG", "Novo nó integrado à topologia: Nó " + info.id + " (" + info.host + ":" + info.portaCluster + ")");
     }
   }
 
@@ -130,6 +130,31 @@ public class ConfigCluster implements Serializable {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  private static Integer carregarIdCacheado(String sufixo) {
+    try {
+      File f = new File(".cluster_node_" + sufixo + ".id");
+      if (f.exists() && f.isFile()) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+          String linha = br.readLine();
+          if (linha != null && !linha.trim().isEmpty()) {
+            int id = Integer.parseInt(linha.trim());
+            if (id > 0) return id;
+          }
+        }
+      }
+    } catch (Exception ignored) {}
+    return null;
+  }
+
+  private static void salvarIdCacheado(String sufixo, int id) {
+    try {
+      File f = new File(".cluster_node_" + sufixo + ".id");
+      try (java.io.FileOutputStream fos = new java.io.FileOutputStream(f)) {
+        fos.write(String.valueOf(id).getBytes("UTF-8"));
+      }
+    } catch (Exception ignored) {}
   }
 
   /**
@@ -178,16 +203,16 @@ public class ConfigCluster implements Serializable {
       }
     }
 
-    System.out.printf("[CONFIG:AUTO] ID atribuido automaticamente: Nó %d | Portas: Cluster=%d, TCP=%d, UDP=%d\n",
-        idEscolhido, minhaPortaCluster, minhaPortaTcp, minhaPortaUdp);
+    ClusterLog.info("CONFIG:LOCAL", String.format("Nó %d atribuído | Portas: Cluster=%d, TCP=%d, UDP=%d",
+        idEscolhido, minhaPortaCluster, minhaPortaTcp, minhaPortaUdp));
     if (mapa.size() > 1) {
-      System.out.print("[CONFIG:AUTO] Nós locais detectados previamente em execucao: ");
+      StringBuilder sb = new StringBuilder("Nós locais detectados: ");
       for (Integer id : mapa.keySet()) {
-        if (id != idEscolhido) System.out.print("Nó " + id + " ");
+        if (id != idEscolhido) sb.append("Nó ").append(id).append(" ");
       }
-      System.out.println();
+      ClusterLog.info("CONFIG:LOCAL", sb.toString().trim());
     } else {
-      System.out.println("[CONFIG:AUTO] Nenhum outro nó local ativo encontrado. Este nó sera o pioneiro do cluster.");
+      ClusterLog.info("CONFIG:LOCAL", "Nenhum outro nó local ativo. Este nó será o pioneiro do cluster.");
     }
 
     return new ConfigCluster(idEscolhido, mapa);
@@ -205,26 +230,37 @@ public class ConfigCluster implements Serializable {
     int portaTcpPadrao = Protocolo.PORTA_SERVIDOR_TCP;
     int portaUdpPadrao = Protocolo.PORTA_SERVIDOR_UDP;
 
-    System.out.println("[CONFIG:REDE] Sondando presenca de cluster existente na rede local via broadcast...");
+    ClusterLog.info("CONFIG:REDE", "Sondando presença de cluster existente na rede local via broadcast...");
     Map<Integer, NoInfo> paresRede = BeaconClusterLAN.sondarParesNaRede(meuIp, portaClusterPadrao, portaTcpPadrao, portaUdpPadrao);
 
-    int idEscolhido = 1;
+    int idEscolhido = -1;
     if (idForcado != null && idForcado > 0) {
       idEscolhido = idForcado;
-    } else if (!paresRede.isEmpty()) {
-      int maior = 0;
-      for (Integer id : paresRede.keySet()) {
-        if (id > maior) maior = id;
+      ClusterLog.info("CONFIG:REDE", "Utilizando ID forçado por parâmetro: Nó " + idEscolhido);
+    } else {
+      // 1. Tenta reutilizar o ID previamente atribuido a esta maquina
+      Integer idCache = carregarIdCacheado("lan");
+      if (idCache != null && idCache > 0 && !paresRede.containsKey(idCache)) {
+        idEscolhido = idCache;
+        ClusterLog.info("CONFIG:REDE", "Reassumindo identidade anterior desta máquina: Nó " + idEscolhido);
+      } else {
+        // 2. Preenchimento de lacunas (Gap Recycling): menor inteiro positivo livre >= 1
+        int candidato = 1;
+        while (paresRede.containsKey(candidato)) {
+          candidato++;
+        }
+        idEscolhido = candidato;
+        ClusterLog.info("CONFIG:REDE", "Alocando menor ID livre no cluster: Nó " + idEscolhido);
       }
-      idEscolhido = maior + 1;
     }
+    salvarIdCacheado("lan", idEscolhido);
 
     Map<Integer, NoInfo> mapa = new ConcurrentHashMap<>(paresRede);
     NoInfo meuInfo = new NoInfo(idEscolhido, meuIp, portaClusterPadrao, portaTcpPadrao, portaUdpPadrao, Protocolo.PORTA_DISCOVERY);
     mapa.put(idEscolhido, meuInfo);
 
-    System.out.printf("[CONFIG:REDE] ID atribuido automaticamente: Nó %d (%s) | Pares encontrados: %d\n",
-        idEscolhido, meuIp, paresRede.size());
+    ClusterLog.info("CONFIG:REDE", String.format("Nó %d pronto (%s) | Pares encontrados na LAN: %d",
+        idEscolhido, meuIp, paresRede.size()));
 
     return new ConfigCluster(idEscolhido, mapa);
   }
